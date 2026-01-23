@@ -1,0 +1,22 @@
+[
+    {
+        "location": "Hernando Beach Boat Ramp",
+        "is_available": true
+    },
+    {
+        "location": "Public Library",
+        "is_available": true
+    },
+    {
+        "location": "Grocery Store",
+        "is_available": false
+    },
+    {
+        "location": "The Old Dock",
+        "is_available": false
+    },
+    {
+        "location": "Main Street Post Office",
+        "is_available": false
+    }
+]
