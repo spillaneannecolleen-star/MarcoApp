@@ -43,8 +43,8 @@ with col2:
     st.warning("🛠️ Controls")
     selected_spot = st.selectbox("Select a Spot:", ["1", "2", "3", "4"])
    
-    if st.button("Park Here (Take Spot)"):
-        # Get current time (e.g., "5:30 PM")
+    if st.button("PARK NOW (6:10 PM)"):
+       
     current_time = (datetime.now() - timedelta(hours=5)).strftime("%I:%M %p")
         # Save the status WITH the time
         spots[selected_spot] = f"Taken since {current_time}"
