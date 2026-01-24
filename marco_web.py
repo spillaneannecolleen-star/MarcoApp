@@ -1,7 +1,8 @@
 import streamlit as st
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+
 
 # --- 1. SETUP THE DATABASE ---
 DB_FILE = "marco_db.json"
@@ -44,7 +45,7 @@ with col2:
    
     if st.button("Park Here (Take Spot)"):
         # Get current time (e.g., "5:30 PM")
-        current_time = datetime.now().strftime("%I:%M %p")
+    current_time = (datetime.now() - timedelta(hours=5)).strftime("%I:%M %p")
         # Save the status WITH the time
         spots[selected_spot] = f"Taken since {current_time}"
         save_data(data)
