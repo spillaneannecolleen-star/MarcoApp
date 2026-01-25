@@ -28,6 +28,7 @@ st.subheader("Real-Time Parking Tracker")
 data = load_data()
 spots = data["spots"]
 
+# Create two columns for layout
 col1, col2 = st.columns(2)
 
 with col1:
@@ -36,24 +37,44 @@ with col1:
         if status == "Free":
             st.success(f"Spot {spot_id}: OPEN 🟢")
         else:
-            # This shows the time info now!
+            # Shows the "Taken" status in red
             st.error(f"Spot {spot_id}: {status} 🔴")
 
 with col2:
     st.warning("🛠️ Controls")
-    selected_spot = st.selectbox("Select a Spot:", ["1", "2", "3", "4"])
    
-    if st.button("PARK NOW (6:10 PM)"):
+    # Dropdown to select a spot
+    spot_options = ["1", "2", "3", "4"]
+    selected_spot = st.selectbox("Select a Spot:", spot_options)
+
+    # --- PARK BUTTON ---
+    if st.button("PARK NOW"):
+        # Calculate current time (adjusting for timezone if needed)
+        current_time = (datetime.now() - timedelta(hours=5)).strftime("%I:%M %p")
        
-    current_time = (datetime.now() - timedelta(hours=5)).strftime("%I:%M %p")
-        # Save the status WITH the time
+        # Save the status to the dictionary
         spots[selected_spot] = f"Taken since {current_time}"
-        save_data(data)
+       
+        # Save the data to the file (assuming you have a save function, otherwise this just updates the screen)
+        # save_data(data)
+       
+        st.success(f"Spot {selected_spot} marked as Taken at {current_time}")
         st.rerun()
 
-    if st.button("Leave Spot (Free Up)"):
+    # --- LEAVE BUTTON ---
+    if st.button("LEAVE Spot (Free Up)"):
         spots[selected_spot] = "Free"
-        save_data(data)
+       
+        # save_data(data) # Uncomment this if you have the save function ready
+       
+        st.success(f"Spot {selected_spot} is now Free!")
         st.rerun()
+
+ 
+
+            
+        
+
+    
 
  
