@@ -1,73 +1,46 @@
 import streamlit as st
-from datetime import datetime, timedelta
+from streamlit_folium import st_folium
+import folium
+from marco_logic import SpotProvider, SpotSeeker, UserSystem
 
-# --- PAGE SETUP (Make it Orange-themed) ---
-st.set_page_config(page_title="Marco", page_icon="🍊", layout="centered")
+if 'user_sys' not in st.session_state:
+    st.session_state.user_sys = UserSystem()
+if 'seeker' not in st.session_state:
+    st.session_state.seeker = SpotSeeker()
 
-# Custom CSS to make the Title Orange
-st.markdown("""
-    <style>
-    h1 {
-        color: #FF8800; /* Bright Orange */
-    }
-    div.stButton > button:first-child {
-        border-color: #FF8800;
-        color: #FF8800;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+st.set_page_config(page_title="Marco", page_icon="🚗")
 
-# --- IMPORT LOGIC ---
-try:
-    from marco_logic import load_data, save_data, reset_db
-except ImportError:
-    st.error("Logic file not found!")
+st.title("🚗 Marco")
 
-st.title("🍊 Marco Parking App")
-st.subheader("Real-Time Parking Tracker")
+tab1, tab2, tab3 = st.tabs(["Leave", "Find", "Leaderboard"])
 
-# 1. Load Data
-data = load_data()
-spots = data["spots"]
-
-col1, col2 = st.columns(2)
-
-# --- LEFT COLUMN: STATUS ---
-with col1:
-    st.info("🅿️ Parking Status")
-    for spot_id, status in spots.items():
-        if status == "Free":
-            st.success(f"{spot_id}: OPEN 🟢")
-        else:
-            # st.warning shows up as Orange/Yellow!
-            st.warning(f"{spot_id}: {status} 🟠")
-
-# --- RIGHT COLUMN: CONTROLS ---
-with col2:
-    st.write("🛠️ **Controls**")
+with tab2:
+    st.header("Available Spots")
    
-    # Dropdown to select a spot
-    spot_options = list(spots.keys())
-    selected_spot = st.selectbox("Select a Spot:", spot_options)
+    # Map (kept simple for this version)
+    m = folium.Map(location=[28.5383, -81.3792], zoom_start=16)
+    results = st.session_state.seeker.search_spots("")
+    for s in results:
+        folium.Marker([s['lat'], s['lon']], popup=s['name']).add_to(m)
+    st_folium(m, width=700, height=300)
 
-    # PARK BUTTON
-    if st.button("PARK NOW"):
-        current_time = (datetime.now() - timedelta(hours=5)).strftime("%I:%M %p")
-        spots[selected_spot] = f"Taken since {current_time}"
-        save_data(data)
-        st.rerun()
+    st.divider()
 
-    # LEAVE BUTTON
-    if st.button("LEAVE Spot"):
-        spots[selected_spot] = "Free"
-        save_data(data)
-        st.success(f"{selected_spot} is Free!")
-        st.rerun()
+    # List of spots with "Report False" buttons
+    for i, spot in enumerate(results):
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write(f"✅ **{spot['name']}** (Posted by {spot['posted_by']})")
+        with col2:
+            # Unique key for every button
+            if st.button("🚩 False", key=f"report_{i}"):
+                note = st.session_state.user_sys.report_false_spot(spot['posted_by'])
+                st.toast(note)
+                st.warning("Thank you for keeping Marco accurate!")
 
-    st.markdown("---")
-    # RESET BUTTON (Use this once to get the new spot names!)
-    if st.button("⚠️ RESET ALL SPOTS"):
-        data = reset_db()
-        st.rerun()
+with tab3:
+    st.header("Top Scouts")
+    # Using a Dataframe for a more professional "App Store" table look
+    st.dataframe(st.session_state.user_sys.get_leaderboard(), use_container_width=True, hide_index=True)
 
  
